@@ -8,26 +8,27 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
-  name         String
-  email        String         @unique
-  phone        String?
-  password     String
-  role         UserRole
-  avatar       String?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  phone     String?
+  password  String
+  role      UserRole
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  vendor       Vendor?
-  bookings     Booking[]
-  reviews      Review[]
-  payments     Payment[]
-  messages     Message[]      @relation("UserMessages")
+  vendor        Vendor?
+  bookings      Booking[]
+  reviews       Review[]
+  payments      Payment[]
+  sentMessages  Message[]      @relation("MessageSender")
   conversations Conversation[] @relation("ConversationParticipants")
+  notifications Notification[] 
 }
 
 model Vendor {
-  id           String     @id @default(uuid())
+  id           String   @id @default(uuid())
   name         String
   description  String?
   address      String
@@ -37,41 +38,41 @@ model Vendor {
   phone        String
   email        String
   image        String?
-  rating       Float      @default(0)
-  totalReviews Int        @default(0)
-  ownerId      String     @unique
-  owner        User       @relation(fields: [ownerId], references: [id])
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  rating       Float    @default(0)
+  totalReviews Int      @default(0)
+  ownerId      String   @unique
+  owner        User     @relation(fields: [ownerId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
-  services     Service[]
-  staff        Staff[]
-  bookings     Booking[]
-  reviews      Review[]
+  services Service[]
+  staff    Staff[]
+  bookings Booking[]
+  reviews  Review[]
 }
 
 model Staff {
-  id           String     @id @default(uuid())
+  id           String         @id @default(uuid())
   name         String
   avatar       String?
   phone        String?
   vendorId     String
-  vendor       Vendor     @relation(fields: [vendorId], references: [id])
-  services     Service[]  @relation("StaffServices")
+  vendor       Vendor         @relation(fields: [vendorId], references: [id])
+  services     Service[]      @relation("StaffServices")
   availability Availability[]
   bookings     Booking[]
 }
 
 model Service {
-  id          String     @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
   description String?
-  duration    Int        // in minutes
+  duration    Int // in minutes
   price       Float
   image       String?
   vendorId    String
-  vendor      Vendor     @relation(fields: [vendorId], references: [id])
-  staff       Staff[]    @relation("StaffServices")
+  vendor      Vendor    @relation(fields: [vendorId], references: [id])
+  staff       Staff[]   @relation("StaffServices")
   bookings    Booking[]
 }
 
@@ -86,12 +87,12 @@ model Booking {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  user        User          @relation(fields: [userId], references: [id])
-  vendor      Vendor        @relation(fields: [vendorId], references: [id])
-  service     Service       @relation(fields: [serviceId], references: [id])
-  staff       Staff         @relation(fields: [staffId], references: [id])
-  payment     Payment?
-  review      Review?
+  user    User     @relation(fields: [userId], references: [id])
+  vendor  Vendor   @relation(fields: [vendorId], references: [id])
+  service Service  @relation(fields: [serviceId], references: [id])
+  staff   Staff    @relation(fields: [staffId], references: [id])
+  payment Payment?
+  review  Review?
 }
 
 model Review {
@@ -103,9 +104,9 @@ model Review {
   bookingId String   @unique
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id])
-  vendor    Vendor   @relation(fields: [vendorId], references: [id])
-  booking   Booking  @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  vendor  Vendor  @relation(fields: [vendorId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id])
 }
 
 model Payment {
@@ -117,41 +118,57 @@ model Payment {
   userId    String
   createdAt DateTime      @default(now())
 
-  user      User          @relation(fields: [userId], references: [id])
-  booking   Booking       @relation(fields: [bookingId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+  booking Booking @relation(fields: [bookingId], references: [id])
 }
 
 model Availability {
-  id        String   @id @default(uuid())
-  dayOfWeek Int      // 0 (Sunday) to 6 (Saturday)
-  startTime String   // "09:00"
-  endTime   String   // "18:00"
+  id        String @id @default(uuid())
+  dayOfWeek Int // 0 (Sunday) to 6 (Saturday)
+  startTime String // "09:00"
+  endTime   String // "18:00"
   staffId   String
-  staff     Staff    @relation(fields: [staffId], references: [id])
+  staff     Staff  @relation(fields: [staffId], references: [id])
 }
 
 model Conversation {
-  id             String       @id @default(uuid())
-  participants   User[]       @relation("ConversationParticipants")
-  messages       Message[]    @relation("ConversationMessages")
-  lastMessageId  String?      @unique
-  lastMessage    Message?     @relation(fields: [lastMessageId])
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id            String    @id @default(uuid())
+  participants  User[]    @relation("ConversationParticipants")
+  messages      Message[] @relation("ConversationMessages")
+  lastMessageId String?   @unique
+  lastMessage   Message?  @relation(fields: [lastMessageId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Message {
-  id                String       @id @default(uuid())
-  content           String
-  sender            User         @relation("MessageSender", fields: [senderId], references: [id])
-  senderId          String
-  conversation      Conversation @relation("ConversationMessages", fields: [conversationId], references: [id])
-  conversationId    String       @unique
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  userMessages      User?        @relation("UserMessages")
+  id             String        @id @default(uuid())
+  content        String
+  sender         User          @relation("MessageSender", fields: [senderId], references: [id])
+  senderId       String
+  conversation   Conversation  @relation("ConversationMessages", fields: [conversationId], references: [id])
+  conversationId String        @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  Conversation   Conversation?
 }
+model Notification {
+  id            String     @id @default(uuid())
+  title         String
+  message       String
+  userId        String
+  isRead        Boolean    @default(false)
+  notificationType NotificationType
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
+  user          User       @relation(fields: [userId], references: [id])
+}
+enum NotificationType {
+  BOOKING_UPDATE
+  MESSAGE
+  SYSTEM
+}
 enum UserRole {
   ADMIN
   VENDOR

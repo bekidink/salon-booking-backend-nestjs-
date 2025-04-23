@@ -10,10 +10,10 @@ export class StaffService {
   async findAll() {
     return this.prisma.staff.findMany({
       include: {
-        vendor: true, // includes the vendor related to the staff
-        services: true, // includes services provided by the staff
-        availability: true, // includes availability details for the staff
-        bookings: true, // includes bookings related to the staff
+        vendor: true,
+        services: true,
+        availability: true,
+        bookings: true,
       },
     });
   }
@@ -31,15 +31,51 @@ export class StaffService {
   }
 
   async create(createStaffDto: CreateStaffDto) {
+    const { services, availability, ...staffData } = createStaffDto;
+
     return this.prisma.staff.create({
-      data: createStaffDto,
+      data: {
+        ...staffData,
+        services: services
+          ? {
+              connect: services.map((id) => ({ id })),
+            }
+          : undefined,
+        availability: availability
+          ? {
+              connect: availability.map((id) => ({ id })),
+            }
+          : undefined,
+      },
+      include: {
+        services: true,
+        availability: true,
+      },
     });
   }
 
   async update(id: string, updateStaffDto: UpdateStaffDto) {
+    const { services, availability, ...staffData } = updateStaffDto;
+
     return this.prisma.staff.update({
       where: { id },
-      data: updateStaffDto,
+      data: {
+        ...staffData,
+        services: services
+          ? {
+              set: services.map((id) => ({ id })),
+            }
+          : undefined,
+        availability: availability
+          ? {
+              set: availability.map((id) => ({ id })),
+            }
+          : undefined,
+      },
+      include: {
+        services: true,
+        availability: true,
+      },
     });
   }
 

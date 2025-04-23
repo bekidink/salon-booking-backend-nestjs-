@@ -10,9 +10,9 @@ export class ServiceService {
   async findAll() {
     return this.prisma.service.findMany({
       include: {
-        vendor: true, // includes the vendor associated with the service
-        staff: true, // includes the staff offering the service
-        bookings: true, // includes bookings related to the service
+        vendor: true,
+        staff: true,
+        bookings: true,
       },
     });
   }
@@ -29,15 +29,41 @@ export class ServiceService {
   }
 
   async create(createServiceDto: CreateServiceDto) {
+    const { staff, ...serviceData } = createServiceDto;
+
     return this.prisma.service.create({
-      data: createServiceDto,
+      data: {
+        ...serviceData,
+        staff: staff
+          ? {
+              connect: staff.map((id) => ({ id })),
+            }
+          : undefined,
+      },
+      include: {
+        staff: true,
+        vendor: true,
+      },
     });
   }
 
   async update(id: string, updateServiceDto: UpdateServiceDto) {
+    const { staff, ...serviceData } = updateServiceDto;
+
     return this.prisma.service.update({
       where: { id },
-      data: updateServiceDto,
+      data: {
+        ...serviceData,
+        staff: staff
+          ? {
+              set: staff.map((id) => ({ id })),
+            }
+          : undefined,
+      },
+      include: {
+        staff: true,
+        vendor: true,
+      },
     });
   }
 
