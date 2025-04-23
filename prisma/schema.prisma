@@ -8,136 +8,136 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  name          String
-  email         String         @unique
-  phone         String?
-  password      String
-  role          UserRole
-  avatar        String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  phone        String?
+  password     String
+  role         UserRole
+  avatar       String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
-  vendor        Vendor?
-  bookings      Booking[]
-  reviews       Review[]
-  payments      Payment[]
-  messages      Message[]      @relation("UserMessages")
- conversations Conversation[] @relation("ConversationParticipants")
+  vendor       Vendor?
+  bookings     Booking[]
+  reviews      Review[]
+  payments     Payment[]
+  messages     Message[]      @relation("UserMessages")
+  conversations Conversation[] @relation("ConversationParticipants")
 }
 
 model Vendor {
-  id            String     @id @default(uuid())
-  name          String
-  description   String?
-  address       String
-  city          String
-  state         String
-  postalCode    String
-  phone         String
-  email         String
-  image         String?
-  rating        Float      @default(0)
-  totalReviews  Int        @default(0)
-  ownerId       String     @unique
-  owner         User       @relation(fields: [ownerId], references: [id])
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id           String     @id @default(uuid())
+  name         String
+  description  String?
+  address      String
+  city         String
+  state        String
+  postalCode   String
+  phone        String
+  email        String
+  image        String?
+  rating       Float      @default(0)
+  totalReviews Int        @default(0)
+  ownerId      String     @unique
+  owner        User       @relation(fields: [ownerId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
-  services      Service[]
-  staff         Staff[]
-  bookings      Booking[]
-  reviews       Review[]
+  services     Service[]
+  staff        Staff[]
+  bookings     Booking[]
+  reviews      Review[]
 }
 
 model Staff {
-  id          String     @id @default(uuid())
-  name        String
-  avatar      String?
-  phone       String?
-  vendorId    String
-  vendor      Vendor     @relation(fields: [vendorId], references: [id])
-  services    Service[]  @relation("StaffServices")
+  id           String     @id @default(uuid())
+  name         String
+  avatar       String?
+  phone        String?
+  vendorId     String
+  vendor       Vendor     @relation(fields: [vendorId], references: [id])
+  services     Service[]  @relation("StaffServices")
   availability Availability[]
-  bookings    Booking[]
+  bookings     Booking[]
 }
 
 model Service {
-  id            String     @id @default(uuid())
-  name          String
-  description   String?
-  duration      Int        // in minutes
-  price         Float
-  image         String?
-  vendorId      String
-  vendor        Vendor     @relation(fields: [vendorId], references: [id])
-  staff         Staff[]    @relation("StaffServices")
-  bookings      Booking[]
+  id          String     @id @default(uuid())
+  name        String
+  description String?
+  duration    Int        // in minutes
+  price       Float
+  image       String?
+  vendorId    String
+  vendor      Vendor     @relation(fields: [vendorId], references: [id])
+  staff       Staff[]    @relation("StaffServices")
+  bookings    Booking[]
 }
 
 model Booking {
-  id            String     @id @default(uuid())
-  bookingDate   DateTime
-  status        BookingStatus @default(PENDING)
-  userId        String
-  vendorId      String
-  serviceId     String
-  staffId       String
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  id          String        @id @default(uuid())
+  bookingDate DateTime
+  status      BookingStatus @default(PENDING)
+  userId      String
+  vendorId    String
+  serviceId   String
+  staffId     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  user          User       @relation(fields: [userId], references: [id])
-  vendor        Vendor     @relation(fields: [vendorId], references: [id])
-  service       Service    @relation(fields: [serviceId], references: [id])
-  staff         Staff      @relation(fields: [staffId], references: [id])
-  payment       Payment?
-  review        Review?
+  user        User          @relation(fields: [userId], references: [id])
+  vendor      Vendor        @relation(fields: [vendorId], references: [id])
+  service     Service       @relation(fields: [serviceId], references: [id])
+  staff       Staff         @relation(fields: [staffId], references: [id])
+  payment     Payment?
+  review      Review?
 }
 
 model Review {
-  id          String   @id @default(uuid())
-  rating      Int      @default(5)
-  comment     String?
-  userId      String
-  vendorId    String
-  bookingId   String   @unique
-  createdAt   DateTime @default(now())
+  id        String   @id @default(uuid())
+  rating    Int      @default(5)
+  comment   String?
+  userId    String
+  vendorId  String
+  bookingId String   @unique
+  createdAt DateTime @default(now())
 
-  user        User     @relation(fields: [userId], references: [id])
-  vendor      Vendor   @relation(fields: [vendorId], references: [id])
-  booking     Booking  @relation(fields: [bookingId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  vendor    Vendor   @relation(fields: [vendorId], references: [id])
+  booking   Booking  @relation(fields: [bookingId], references: [id])
 }
 
 model Payment {
-  id          String   @id @default(uuid())
-  bookingId   String   @unique
-  amount      Float
-  method      String
-  status      PaymentStatus @default(PENDING)
-  userId      String
-  createdAt   DateTime @default(now())
+  id        String        @id @default(uuid())
+  bookingId String        @unique
+  amount    Float
+  method    String
+  status    PaymentStatus @default(PENDING)
+  userId    String
+  createdAt DateTime      @default(now())
 
-  user        User     @relation(fields: [userId], references: [id])
-  booking     Booking  @relation(fields: [bookingId], references: [id])
+  user      User          @relation(fields: [userId], references: [id])
+  booking   Booking       @relation(fields: [bookingId], references: [id])
 }
 
 model Availability {
-  id          String   @id @default(uuid())
-  dayOfWeek   Int      // 0 (Sunday) to 6 (Saturday)
-  startTime   String   // "09:00"
-  endTime     String   // "18:00"
-  staffId     String
-  staff       Staff    @relation(fields: [staffId], references: [id])
+  id        String   @id @default(uuid())
+  dayOfWeek Int      // 0 (Sunday) to 6 (Saturday)
+  startTime String   // "09:00"
+  endTime   String   // "18:00"
+  staffId   String
+  staff     Staff    @relation(fields: [staffId], references: [id])
 }
 
 model Conversation {
-  id               String       @id @default(uuid())
-  participants     User[]       @relation("ConversationParticipants")
-  messages         Message[]    @relation("ConversationMessages")
-  lastMessageId    String?      @unique
-  lastMessage      Message?     @relation("LastMessage", fields: [lastMessageId], references: [id])
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  id             String       @id @default(uuid())
+  participants   User[]       @relation("ConversationParticipants")
+  messages       Message[]    @relation("ConversationMessages")
+  lastMessageId  String?      @unique
+  lastMessage    Message?     @relation(fields: [lastMessageId])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Message {
@@ -146,14 +146,11 @@ model Message {
   sender            User         @relation("MessageSender", fields: [senderId], references: [id])
   senderId          String
   conversation      Conversation @relation("ConversationMessages", fields: [conversationId], references: [id])
-  conversationId    String       @unique  // Add this line to enforce uniqueness
+  conversationId    String       @unique
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
-  conversationLastMessage Conversation? @relation("LastMessage", fields: [conversationId], references: [id])  // This relation is now one-to-one
+  userMessages      User?        @relation("UserMessages")
 }
-
-
-
 
 enum UserRole {
   ADMIN
